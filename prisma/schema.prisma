@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id Int @default(autoincrement()) @id
+  email String @unique
+  username String @unique
+  name String? @unique //отображаетмы ник на странице
+  password String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  articles Article[]
+  comments Comment[]
+  @@map("users")
+}
+
+model Category{
+  id Int @default(autoincrement()) @id
+  name String @unique
+  createdAt DateTime @default(now())
+  articles Article[]
+  @@map("categories")
+}
+
+model Article {
+  id Int @id @default(autoincrement())
+  title String
+  content String 
+  expert String
+  image String?
+  isPublished Boolean @default(false)
+  publishedAt DateTime?
+  author User @relation(fields: [authorId], references: [id])
+  authorId Int
+  category    Category? @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  @@map("articles")
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+  content String
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId Int
+  author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId  Int?
+  createdAt DateTime  @default(now())
+  @@map("comments")
+}
